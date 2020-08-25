@@ -1,4 +1,5 @@
 const https = require('https');
+const http = require('http');
 
 function printMessage(userName, badgeCount, points){
   const message =`${userName} has ${badgeCount} total badges and ${points} total points`;
@@ -12,8 +13,8 @@ function printError(error){
 function getProfile(username){
   try{
     const request = https.get(`https://teamtreehouse.com/${username}.json`, (res) => {
-    let body = "";
-    
+    if(res.statusCode === 200){
+      let body = "";
     res.on('data', data => {
       body += data.toString();
     });
@@ -26,6 +27,11 @@ function getProfile(username){
             printError(error)       
            }
     });
+    } else {
+      const message = `There was an error getting the profile for ${username} response (${http.STATUS_CODES[res.statusCode]})`;
+      const statusCodeError = new Error(message)
+      printError(statusCodeError);
+    }
    });
   
   request.on('error', printError(error));
